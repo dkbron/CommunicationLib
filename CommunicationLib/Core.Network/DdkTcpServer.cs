@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CommunicationLib.Core.Network
 { 
-    public class DdkTcpServer
+    public class DdkTcpServer : IDisposable
     {
         public TcpListener server = null;
 
@@ -33,8 +33,18 @@ namespace CommunicationLib.Core.Network
         public delegate void ClientDisConnectedDelegate(Client client);
         public event ClientDisConnectedDelegate ClientDisconnectedEvent;
 
+        /// <summary>
+        /// 处理客户端信息事件
+        /// </summary>
+        /// <param name="client">客户端</param>
+        /// <param name="data">收到的信息</param>
         public delegate void RecieveClientMessageDelegate(Client client, byte[] data);
         public event RecieveClientMessageDelegate RecieveClientMessageEvent;
+
+        /// <summary>
+        /// 推送错误信息事件
+        /// </summary>
+        public event Action<string> PushExceptionMessageEvent;
 
         #region 构造
         public DdkTcpServer()
@@ -129,7 +139,7 @@ namespace CommunicationLib.Core.Network
             }
             catch(Exception ex)
             {
-
+                PushExceptionMessageEvent?.Invoke(ex.Message);
             } 
         }
 
@@ -159,7 +169,7 @@ namespace CommunicationLib.Core.Network
                 }
                 catch (Exception ex)
                 {
-                    return;
+                    PushExceptionMessageEvent?.Invoke(ex.Message);
                 }
 
             }
@@ -235,10 +245,15 @@ namespace CommunicationLib.Core.Network
                     client.TcpClient.Client.Disconnect(false);
                 }
             }
-            catch
+            catch(Exception ex)
             {
-
+                PushExceptionMessageEvent?.Invoke(ex.Message);
             }
+        }
+
+        public void Dispose()
+        {
+            server = null;
         }
 
         public class Client

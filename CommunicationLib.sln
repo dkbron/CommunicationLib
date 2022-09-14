@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationLib", "Communi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamplesWPF", "SamplesWPF\SamplesWPF.csproj", "{80382225-1BB8-45CE-9C28-DBD9D66863AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{D02EC3A0-67E5-4A01-9822-E452C31B3B83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DdkTestTool", "DdkTestTool\DdkTestTool.csproj", "{8F9DA1B2-AAD7-4027-BEC4-FC234EC53C42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{80382225-1BB8-45CE-9C28-DBD9D66863AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80382225-1BB8-45CE-9C28-DBD9D66863AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80382225-1BB8-45CE-9C28-DBD9D66863AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D02EC3A0-67E5-4A01-9822-E452C31B3B83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D02EC3A0-67E5-4A01-9822-E452C31B3B83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D02EC3A0-67E5-4A01-9822-E452C31B3B83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D02EC3A0-67E5-4A01-9822-E452C31B3B83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F9DA1B2-AAD7-4027-BEC4-FC234EC53C42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F9DA1B2-AAD7-4027-BEC4-FC234EC53C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F9DA1B2-AAD7-4027-BEC4-FC234EC53C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F9DA1B2-AAD7-4027-BEC4-FC234EC53C42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

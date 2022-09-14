@@ -43,7 +43,7 @@ namespace SamplesWPF
             containerRegistry.RegisterForNavigation<SettingView, SettingViewModel>();
             containerRegistry.RegisterForNavigation<SkinView, SkinViewModel>();
             containerRegistry.RegisterForNavigation<TcpView, TcpViewModel>();
-            containerRegistry.RegisterForNavigation<TcpServerView, TcpServerViewModel>();
+            containerRegistry.RegisterForNavigation<TcpServerView, TcpServerViewModel>(); 
         }
     }
 }

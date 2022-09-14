@@ -55,30 +55,7 @@
                         Grid.Column="1"
                         Content="删除"
                         Command="{Binding DeleteTreeCommand}" />
-            </Grid> 
-            <!--<TreeView x:Name="TreeViewMenuBar"
-                      Grid.Row="1"
-                      ItemsSource="{Binding TreeParents}" 
-                      Grid.Column="0">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectedItemChanged">
-                        <i:InvokeCommandAction Command="{Binding NavigateCommand}"
-                                               CommandParameter="{Binding ElementName=TreeViewMenuBar, Path=SelectedItem}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                        <TextBlock Text="{Binding Name}"
-                                   Margin="3,2" />
-                        <HierarchicalDataTemplate.ItemTemplate>
-                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                <TextBlock Text="{Binding Name}" />
-                            </HierarchicalDataTemplate>
-                        </HierarchicalDataTemplate.ItemTemplate>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate> 
-            </TreeView>-->
-
+            </Grid>  
             <TreeView Grid.Row="1"
                       x:Name="TreeViewMenuBar"
                       ItemsSource="{Binding TreeL1s}">

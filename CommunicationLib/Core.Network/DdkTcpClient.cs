@@ -8,106 +8,84 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommunicationLib.Core.Network
-{
-    public delegate void PushMsg(string msg);
-    public class DdkTcpClient
+{ 
+    public class DdkTcpClient : IDisposable
     {
-        Socket tcpSocketClient;
-        public bool isOpened;
+        public TcpClient Client { get; private set; }
+        public bool IsOpen { get; set; } 
+        private IPAddress LocalIPAddress = IPAddress.Any;
 
+
+        public NetworkStream NetworkStream { get; private set; }
+        private byte[] ReceiveBuffer;
         /// <summary>
         /// 推送收到服务器信息事件
         /// </summary>
-        public PushMsg PushServerMsgEvent;
+        public Action<byte[]> RecieveServerMessageEvent;
 
         /// <summary>
         /// 推送异常信息事件
         /// </summary>
-        public PushMsg PushExceptionMsgEvent;
+        public Action<string> PushExceptionMessageEvent;
 
-        /// <summary>
-        /// 连接服务器
-        /// </summary>
-        /// <param name="ip">服务器ip</param>
-        /// <param name="port">服务器端口</param>
-        public void OpenDevice(string ip, int port)
+        #region 构造
+        public DdkTcpClient()
         {
-            if (!NetworkTools.IsIP(ip) || !NetworkTools.IsPort(port))
-                return;
 
-            isOpened = false;
-            try
-            {
-                tcpSocketClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-
-                tcpSocketClient.Connect(ipEndPoint);  
-                Thread thread = new Thread(RecieveThread);
-                thread.Start();
-
-                isOpened = true;
-            }
-            catch (Exception ex)
-            {
-                PushExceptionMsgEvent?.Invoke(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// 与服务器断开连接
-        /// </summary>
-        public void CloseDevice()
-        {
-            if (!isOpened)
-                return;
-
-            try
-            {
-                tcpSocketClient.Shutdown(SocketShutdown.Both);
-                tcpSocketClient.Close();
-                isOpened = false;
-            }
-            catch (Exception ex)
-            {
-                PushExceptionMsgEvent?.Invoke(ex.Message);
-            }
-        }
-
-        public void SendMsg(string Msg)
-        {
-            if (!isOpened)
-                return; 
-            tcpSocketClient.Send(Encoding.UTF8.GetBytes(Msg));  
-        }
-
-        private void RecieveThread()
-        {
-            while (true)
-            {
-                if (!isOpened || !tcpSocketClient.Connected)
-                {
-                    Thread.Sleep(50);
-                    continue;
-                }
-
-                try
-                {
-                    byte[] recieveBuffer = new byte[1024];
-
-                    int recieveNum = tcpSocketClient.Receive(recieveBuffer);
-                    if (recieveNum > 0)
-                    {
-                        string receivedText = Encoding.ASCII.GetString(recieveBuffer, 0, recieveNum);
-                        PushServerMsgEvent?.Invoke(receivedText);
-                    }
-                    else
-                        Thread.Sleep(20);
-                }
-                catch (Exception ex)
-                {
-                    PushExceptionMsgEvent?.Invoke(ex.Message);
-                }
-            }
         } 
+        public DdkTcpClient(IPEndPoint localEP)
+        {
+            Client = new TcpClient(localEP);
+        }
+        public DdkTcpClient(string hostname, int port)
+        {
+            Client = new TcpClient(hostname,port);
+        }
+        public DdkTcpClient(IPAddress ip, int port)
+        {
+            Client = new TcpClient(new IPEndPoint(ip,port));
+        }
+        public DdkTcpClient(int port)
+        {
+            Client = new TcpClient(new IPEndPoint(LocalIPAddress, port));
+        }
+        #endregion
+        
+        public void Connect(IPEndPoint remoteEP)
+        {
+            Client.Connect(remoteEP);
+            NetworkStream = Client.GetStream();
+            NetworkStream.ReadTimeout = 4000;
+            ReceiveBuffer = new byte[Client.ReceiveBufferSize];
+            NetworkStream.BeginRead(ReceiveBuffer, 0, Client.ReceiveBufferSize, ReadCallBack, null);
+        } 
+
+        private void ReadCallBack(IAsyncResult ir)
+        {
+            try
+            {
+                int read = NetworkStream.EndRead(ir);
+                if (read == 0)
+                {
+                    //OnClientDisconnected(client);
+                    return;
+                }
+                byte[] data = new byte[read];
+                Buffer.BlockCopy(ReceiveBuffer, 0, data, 0, read);
+                string a = Encoding.UTF8.GetString(data);
+                //RecieveClientMessageEvent?.Invoke(client, data);
+                NetworkStream.BeginRead(ReceiveBuffer, 0, ReceiveBuffer.Length, ReadCallBack, null);
+            }
+            catch
+            {
+
+            }
+        }
+
+        public void Dispose()
+        {  
+            NetworkStream?.Dispose();
+            Client.Close();
+        }
     }
 }

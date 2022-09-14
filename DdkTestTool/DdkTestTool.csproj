@@ -1,0 +1,96 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Fonts\fontawesome-webfont.ttf" />
+    <None Remove="Fonts\Lato-Black.ttf" />
+    <None Remove="Fonts\Lato-BlackItalic.ttf" />
+    <None Remove="Fonts\Lato-Bold.ttf" />
+    <None Remove="Fonts\Lato-BoldItalic.ttf" />
+    <None Remove="Fonts\Lato-Hairline.ttf" />
+    <None Remove="Fonts\Lato-HairlineItalic.ttf" />
+    <None Remove="Fonts\Lato-Heavy.ttf" />
+    <None Remove="Fonts\Lato-HeavyItalic.ttf" />
+    <None Remove="Fonts\Lato-Italic.ttf" />
+    <None Remove="Fonts\Lato-Light.ttf" />
+    <None Remove="Fonts\Lato-LightItalic.ttf" />
+    <None Remove="Fonts\Lato-Medium.ttf" />
+    <None Remove="Fonts\Lato-MediumItalic.ttf" />
+    <None Remove="Fonts\Lato-Regular.ttf" />
+    <None Remove="Fonts\Lato-Semibold.ttf" />
+    <None Remove="Fonts\Lato-SemiboldItalic.ttf" />
+    <None Remove="Fonts\Lato-Thin.ttf" />
+    <None Remove="Fonts\Lato-ThinItalic.ttf" />
+    <None Remove="Images\client.png" />
+    <None Remove="Images\home.png" />
+    <None Remove="Images\Logos\网络.png" />
+    <None Remove="Images\server.png" />
+    <None Remove="Images\ToolImages\H.png" />
+    <None Remove="Images\ToolImages\s.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\client.png" />
+    <Resource Include="Images\home.png" />
+    <Resource Include="Images\Logos\网络.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommunicationLib\CommunicationLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\fontawesome-webfont.ttf" />
+    <Resource Include="Fonts\Lato-Black.ttf" />
+    <Resource Include="Fonts\Lato-BlackItalic.ttf" />
+    <Resource Include="Fonts\Lato-Bold.ttf" />
+    <Resource Include="Fonts\Lato-BoldItalic.ttf" />
+    <Resource Include="Fonts\Lato-Hairline.ttf" />
+    <Resource Include="Fonts\Lato-HairlineItalic.ttf" />
+    <Resource Include="Fonts\Lato-Heavy.ttf" />
+    <Resource Include="Fonts\Lato-HeavyItalic.ttf" />
+    <Resource Include="Fonts\Lato-Italic.ttf" />
+    <Resource Include="Fonts\Lato-Light.ttf" />
+    <Resource Include="Fonts\Lato-LightItalic.ttf" />
+    <Resource Include="Fonts\Lato-Medium.ttf" />
+    <Resource Include="Fonts\Lato-MediumItalic.ttf" />
+    <Resource Include="Fonts\Lato-Regular.ttf" />
+    <Resource Include="Fonts\Lato-Semibold.ttf" />
+    <Resource Include="Fonts\Lato-SemiboldItalic.ttf" />
+    <Resource Include="Fonts\Lato-Thin.ttf" />
+    <Resource Include="Fonts\Lato-ThinItalic.ttf" />
+    <Resource Include="Images\server.png" />
+    <Resource Include="Images\ToolImages\H.png" />
+    <Resource Include="Images\ToolImages\s.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Styles\Windows.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Styles\Texts.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Styles\Colors.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Styles\Buttons.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="DdkTestTool.Views.SocketViews.SocketIndexView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:model="clr-namespace:DdkTestTool.Models"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:ext="clr-namespace:DdkTestTool.Extensions"
+             xmlns:cvt="clr-namespace:DdkTestTool.Converter"
+             xmlns:local="clr-namespace:DdkTestTool.Views.SocketViews"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <cvt:StringToImageConverter x:Key="StringToImageConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.Resources>
+            <HierarchicalDataTemplate DataType="{x:Type model:TreeItem}"
+                                      ItemsSource="{Binding Children}">
+                <DockPanel>
+                    <Image Source="{Binding ImageSource}"
+                           Width="25"
+                           Height="25"
+                           Margin="0 0 5 0"
+                           VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                </DockPanel>
+            </HierarchicalDataTemplate> 
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="4*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Height="35"
+                        Margin="0 0 5 0"
+                        Style="{StaticResource RegularButton}"
+                        Content="创建"
+                        Command="{Binding ExecuteTreeViewCommand}"
+                        CommandParameter="Add"/>
+                <Button 
+                    Height="35"
+                        Margin="0"
+                        Grid.Column="1"
+                        Style="{StaticResource RegularButton}"
+                        Content="删除"
+                        Command="{Binding ExecuteTreeViewCommand}" 
+                        CommandParameter="Delete"/>
+            </Grid>
+            <TreeView Grid.Row="1"
+                      x:Name="TreeViewMenuBar"
+                      ItemsSource="{Binding TreeItems}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectedItemChanged">
+                        <i:InvokeCommandAction Command="{Binding NavigateCommand}"
+                                               CommandParameter="{Binding ElementName=TreeViewMenuBar, Path=SelectedItem}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TreeView>
+        </Grid>
+        <ContentControl Grid.Column="1"
+                        prism:RegionManager.RegionName="{x:Static ext:PrismManager.SocketIndexViewRegionName}" />
+    </Grid>
+</UserControl>
