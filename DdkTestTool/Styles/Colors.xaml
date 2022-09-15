@@ -67,4 +67,7 @@
     <Color x:Key="ForegroundBlue">#019CF3</Color>
     <SolidColorBrush x:Key="ForegroundBlueBrush"
                      Color="{StaticResource ForegroundBlue}" />
+    <Color x:Key="ForegroundDarkBlue">#5491b2</Color>
+    <SolidColorBrush x:Key="ForegroundDarkBlueBrush"
+                     Color="{StaticResource ForegroundDarkBlue}" />
 </ResourceDictionary>

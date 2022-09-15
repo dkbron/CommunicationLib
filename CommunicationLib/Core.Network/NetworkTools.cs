@@ -60,35 +60,7 @@ namespace CommunicationLib.Core.Network
                 }
             }
             return AddressIP;
-        }
-
-        //验证IP端口的有效性
-        /// <summary>
-        /// 验证IP端口的有效性
-        /// </summary>
-        /// <param name="TargetPort">目标端口</param>
-        /// <returns>是否验证成功</returns>
-        public static OperationResult VerifyPort(ushort TargetPort)
-        {  
-            try
-            {
-
-                if (TargetPort < 0 | TargetPort > 65535)
-                { 
-                    return new OperationResult("The port value for the Server is not correct, please retry.\r\n你输入的IP地址无效，正确值得范围为0~65535，请修改后再重试.");
-                }
-                else
-                {
-                    return new OperationResult();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult(ex);
-            }
         } 
-
         //将ASCII码转换为16进制码【HEX】
         /// <summary>
         /// 将ASCII码转换为16进制码【HEX】
@@ -112,6 +84,22 @@ namespace CommunicationLib.Core.Network
             }
 
             return TempResult;
+        }
+        public static string EndPointToUIString(EndPoint endPoint)
+        {
+            string ip = endPoint.ToString().Split(':')[0];
+            string port = endPoint.ToString().Split(':')[1];
+
+            return $"{ip} [{port}]";
+        }
+
+
+        public static string IPEndPointToUIString(IPEndPoint endPoint)
+        {
+            string ip = endPoint.ToString().Split(':')[0];
+            string port = endPoint.ToString().Split(':')[1];
+
+            return $"{ip} [{port}]";
         }
 
     }

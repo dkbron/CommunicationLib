@@ -11,19 +11,20 @@
              xmlns:local="clr-namespace:DdkTestTool.Views.SocketViews"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="900">
     <UserControl.Resources>
         <cvt:StringToImageConverter x:Key="StringToImageConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.Resources>
             <HierarchicalDataTemplate DataType="{x:Type model:TreeItem}"
-                                      ItemsSource="{Binding Children}">
+                                      ItemsSource="{Binding Children}"> 
                 <DockPanel>
+                    <!--{Binding ImageSource,Converter={StaticResource StringToImageConverter}}-->
                     <Image Source="{Binding ImageSource}"
-                           Width="25"
-                           Height="25"
-                           Margin="0 0 5 0"
+                           Width="18"
+                           Height="18"
+                           Margin="0 0 4 0"
                            VerticalAlignment="Center" />
                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
                 </DockPanel>
@@ -32,13 +33,13 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
-            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
-                <RowDefinition />
+                <RowDefinition /> 
             </Grid.RowDefinitions>
 
             <Grid>
@@ -66,11 +67,12 @@
                       ItemsSource="{Binding TreeItems}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectedItemChanged">
-                        <i:InvokeCommandAction Command="{Binding NavigateCommand}"
+                        <i:InvokeCommandAction Command="{Binding NavigateToCommand}"
                                                CommandParameter="{Binding ElementName=TreeViewMenuBar, Path=SelectedItem}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-            </TreeView>
+            </TreeView>  
+ 
         </Grid>
         <ContentControl Grid.Column="1"
                         prism:RegionManager.RegionName="{x:Static ext:PrismManager.SocketIndexViewRegionName}" />

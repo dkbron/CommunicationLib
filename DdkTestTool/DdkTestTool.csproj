@@ -27,6 +27,8 @@
     <None Remove="Fonts\Lato-SemiboldItalic.ttf" />
     <None Remove="Fonts\Lato-Thin.ttf" />
     <None Remove="Fonts\Lato-ThinItalic.ttf" />
+    <None Remove="Images\circle-Green.png" />
+    <None Remove="Images\circle-Red.png" />
     <None Remove="Images\client.png" />
     <None Remove="Images\home.png" />
     <None Remove="Images\Logos\网络.png" />
@@ -36,6 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\circle-Green.png" />
+    <Resource Include="Images\circle-Red.png" />
     <Resource Include="Images\client.png" />
     <Resource Include="Images\home.png" />
     <Resource Include="Images\Logos\网络.png" />

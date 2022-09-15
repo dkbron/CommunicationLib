@@ -17,7 +17,9 @@
     <Style TargetType="{x:Type TextBlock}"
            x:Key="BaseTextBlockStyle">
         <Setter Property="FontFamily"
-                Value="{StaticResource LatoRegular}" /> 
+                Value="{StaticResource LatoRegular}" />
+        <Setter Property="FontSize"
+                Value="{StaticResource FontSizeRegular}" />
     </Style>
  
     <Style TargetType="{x:Type Label}" BasedOn="{StaticResource BaseStyle}" />
@@ -27,7 +29,7 @@
 
     <system:Double x:Key="FontSizeSmaller">10</system:Double>
     <system:Double x:Key="FontSizeSmall">12</system:Double>
-    <system:Double x:Key="FontSizeRegular">16</system:Double>
+    <system:Double x:Key="FontSizeRegular">14</system:Double>
     <system:Double x:Key="FontSizeLarge">20</system:Double>
     <system:Double x:Key="FontSizeXLarge">24</system:Double>
     <system:Double x:Key="FontSizeXXLarge">30</system:Double>

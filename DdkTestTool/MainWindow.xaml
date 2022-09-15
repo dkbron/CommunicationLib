@@ -13,6 +13,7 @@
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
+        Icon="/Images/Logos/网络.png"
         Title="DDK网络工具箱"
         Height="600"
         Width="1000"

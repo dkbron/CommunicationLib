@@ -40,7 +40,7 @@
                                           VerticalAlignment="Center">
                             <ContentPresenter.ContentTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding}" FontSize="18" FontFamily="{StaticResource LatoBold}" Foreground="{StaticResource BackgroundLightBrush}"/>
+                                    <TextBlock Text="{Binding}" FontSize="16" FontFamily="{StaticResource LatoBold}" Foreground="{StaticResource BackgroundLightBrush}"/>
                                 </DataTemplate>
                             </ContentPresenter.ContentTemplate>
                         </ContentPresenter>
@@ -48,6 +48,17 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver"
+                     Value="True">
+                
+            </Trigger>
+            <Trigger Property="IsEnabled"
+                     Value="False">
+                <Setter Property="Background"
+                        Value="{StaticResource ForegroundDarkBlueBrush}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
     
     <Style TargetType="{x:Type Button}" 

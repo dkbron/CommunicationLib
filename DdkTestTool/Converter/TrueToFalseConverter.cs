@@ -5,19 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
 
 namespace DdkTestTool.Converter
 {
-    public class StringToImageConverter : IValueConverter
+    public class TrueToFalseConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string imageSource = (string)value;
-            if (string.IsNullOrEmpty(imageSource))
-                return new BitmapImage(null);
-
-            return new BitmapImage(new Uri($"pack://application:,,,{imageSource}"));
+            if (value != null) 
+                return !(bool)value; 
+            return false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -3,12 +3,133 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:DdkTestTool.Views.SocketViews"
+             xmlns:cvt="clr-namespace:DdkTestTool.Converter"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <Control.Resources>
+        <cvt:ViewTypeToVisibilityConverter x:Key="ViewTypeToVisibilityConverter" />
+        <cvt:ViewTypeToVisibilityConverter1 x:Key="ViewTypeToVisibilityConverter1" />
+        <cvt:ViewTypeToVisibilityConverter2 x:Key="ViewTypeToVisibilityConverter2" />
+        <cvt:TrueToFalseConverter x:Key="TrueToFalseConverter" />
+    </Control.Resources>
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <GroupBox Header="Socket状态">
+            <StackPanel Margin="5 0 5 0">
+                <TextBlock Text="{Binding ServerStatus}" Margin="0 5 0 0"/>
+                <StackPanel Orientation="Horizontal"
+                            Margin="0 10">
+                    <Button Content="启动监听"
+                            Width="100"
+                            Height="30" 
+                            Style="{StaticResource RegularButton}"
+                            Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter}}"
+                            Command="{Binding ConnectCommand}"
+                            IsEnabled="{Binding IsServerOpened, Converter={StaticResource TrueToFalseConverter}}" />
+                    <Button Content="{Binding CloseButtonText}"
+                            Margin=" 10 0 0 0"
+                            Width="100"
+                            Height="30" 
+                            Style="{StaticResource RegularButton}"
+                            Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter2}}"
+                            Command="{Binding DisConnectCommand}"
+                            IsEnabled="{Binding IsServerOpened}" />
+                    <TextBlock Text="本地IP:"
+                               VerticalAlignment="Center"
+                               Margin="100 0 0 0"
+                               FontWeight="Bold" />
+                    <TextBlock Text="{Binding Ip}"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                    <TextBlock Text="本地端口:"
+                               VerticalAlignment="Center"
+                               Margin="10 0 0 0"
+                               FontWeight="Bold" />
+                    <TextBlock Text="{Binding Port}"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                    <TextBlock Text="客户端IP:"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter1}}"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                    <TextBlock Text="{Binding ClientIp}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter1}}"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                    <TextBlock Text="客户端端口:"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter1}}"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                    <TextBlock Text="{Binding ClientPort}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentViewType, Converter={StaticResource ViewTypeToVisibilityConverter1}}"
+                               FontWeight="Bold"
+                               Margin="10 0 0 0" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1"
+                  Header="数据接收窗口"
+                  Cursor="Arrow">
+            <TextBox x:Name="DataRecieveTextBox"
+                     Text="{Binding DataRecieveStr}"
+                     IsReadOnlyCaretVisible="True"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:CallMethodAction MethodName="ScrollToEnd" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBox>
+        </GroupBox>
+        <GroupBox Grid.Row="2"
+                  Header="数据发送窗口"
+                  Cursor="Arrow">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Text="{Binding DataSendStr, Mode=TwoWay}" />
+                <StackPanel Grid.Column="1">
+                    <Button Content="发送数据"
+                            Width="100"
+                            Height="30"
+                            Margin="20 5 0 0"
+                            Style="{StaticResource RegularButton}"
+                            Command="{Binding SendDataCommand}" />
+                    <TextBlock Text="重复发送次数"
+                               HorizontalAlignment="Center"
+                               Margin="20 5 0 0" />
+                    <ComboBox Margin="20 0 0 0"
+                              SelectedIndex="{Binding SendTimesIndex}"
+                              Width="100">
+                        <ComboBoxItem>1</ComboBoxItem>
+                        <ComboBoxItem>10</ComboBoxItem>
+                        <ComboBoxItem>100</ComboBoxItem>
+                        <ComboBoxItem>1000</ComboBoxItem>
+                        <ComboBoxItem>10000</ComboBoxItem>
+                    </ComboBox> 
+                </StackPanel>
+            </Grid>
+        </GroupBox>
     </Grid>
 </UserControl>
