@@ -31,7 +31,7 @@ namespace DdkTestTool
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         { 
             containerRegistry.RegisterDialog<AddServerDialog, AddServerDialogViewModel>();
-
+            containerRegistry.RegisterDialog<AddClientDialog, AddClientDialogViewModel>();
             containerRegistry.RegisterForNavigation<MainWindow, WindowViewModel>();
             containerRegistry.RegisterForNavigation<WelcomeView, WelcomeViewModel>();
             containerRegistry.RegisterForNavigation<IndexView, IndexViewModel>();

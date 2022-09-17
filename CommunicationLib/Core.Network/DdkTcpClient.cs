@@ -51,9 +51,9 @@ namespace CommunicationLib.Core.Network
         }
         #endregion
         
-        public void Connect(IPEndPoint remoteEP)
+        public void Connect()
         {
-            Client.Connect(remoteEP);
+            //Client.Connect(remoteEP);
             NetworkStream = Client.GetStream();
             NetworkStream.ReadTimeout = 4000;
             ReceiveBuffer = new byte[Client.ReceiveBufferSize];

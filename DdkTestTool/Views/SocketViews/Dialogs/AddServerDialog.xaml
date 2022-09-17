@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DdkTestTool.Views.SocketViews.Dialogs"
-             xmlns:prism="http://prismlibrary.com/"
+             xmlns:prism="http://prismlibrary.com/"  
              mc:Ignorable="d"
              Width="300"
-             Height="200">
+             Height="200" > 
     <Grid VerticalAlignment="Center"
           HorizontalAlignment="Center"
           Cursor="Arrow">
@@ -19,20 +19,51 @@
             <TextBlock Text="端口: "
                        VerticalAlignment="Center" />
             <TextBox Width="150"
+                     Height="25"
                      VerticalAlignment="Center"
-                     Text="{Binding Port}"
-                     PreviewTextInput="TextBox_PreviewTextInput" />
+                     HorizontalAlignment="Center"
+                     Text="{Binding Port,Mode=TwoWay}"> 
+                    <TextBox.Resources>
+                        <VisualBrush x:Key="HintText"
+                                     TileMode="None"
+                                     Opacity="0.5"
+                                     Stretch="None"
+                                     AlignmentX="Left">
+                            <VisualBrush.Visual>
+                                <TextBlock FontStyle="Italic"
+                                           Text="请输入端口号" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </TextBox.Resources>
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <Trigger Property="Text"
+                                     Value="{x:Null}">
+                                <Setter Property="Background"
+                                        Value="{StaticResource HintText}" />
+                            </Trigger>
+                            <Trigger Property="Text"
+                                     Value="">
+                                <Setter Property="Background"
+                                        Value="{StaticResource HintText}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style> 
+            </TextBox>
         </StackPanel>
         <DockPanel Grid.Row="1"
                    Margin="0 20 0 0"
                    LastChildFill="False">
             <Button Content="确定"
-                    Width="60"
+                    Width="70" Height="30"
                     Style="{StaticResource RegularButton}"
                     Command="{Binding SaveCommand}" />
             <Button Content="取消"
                     DockPanel.Dock="Right"
-                    Width="60"
+                    Width="70"
+                    Height="30"
                     Style="{StaticResource RegularButton}"
                     Command="{Binding CancelCommand}" />
         </DockPanel>

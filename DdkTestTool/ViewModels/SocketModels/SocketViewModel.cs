@@ -22,7 +22,8 @@ namespace DdkTestTool.ViewModels.SocketModels
 
         private readonly IEventAggregator aggregator;
         private DdkTcpServer tcpServer;
-        private DdkTcpServer.Client tcpClient; 
+        private DdkTcpServer.Client tcpServerClient;
+        private DdkTcpClient tcpClient;
 
         private SocketManager.ViewType currentViewType;
         public SocketManager.ViewType CurrentViewType
@@ -42,6 +43,8 @@ namespace DdkTestTool.ViewModels.SocketModels
                         CloseButtonText = "断开";
                         break;
                     case SocketManager.ViewType.TcpClient:
+                        CloseButtonText = "断开";
+                        ConnectButtonText = "连接";
                         break;
                 }
 
@@ -127,7 +130,15 @@ namespace DdkTestTool.ViewModels.SocketModels
         {
             get { return closeButtonText; }
             set { closeButtonText = value; RaisePropertyChanged(); }
-        } 
+        }
+        private string connectButtonText = "开始监听";
+
+        public string ConnectButtonText
+        {
+            get { return connectButtonText; }
+            set { connectButtonText = value; RaisePropertyChanged(); }
+        }
+
         #endregion
 
         public SocketViewModel(IEventAggregator aggregator)
@@ -168,49 +179,69 @@ namespace DdkTestTool.ViewModels.SocketModels
             string _type = (string)navigationContext.Parameters["Type"];
             try
             {
-
-                if (_type == "TcpServer")
+                switch (_type)
                 {
-                    Ip = _ip;
-                    Port = int.Parse(_port);
-                    CurrentViewType = SocketManager.ViewType.TcpServer;
-                    var _server = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals($"{Ip}:{Port}"));
-                    if (_server == null)
-                    {
-                        IsServerOpened = false;
-                        tcpServer = new DdkTcpServer(Ip, Port);
-                        tcpServer.ClientConnectedEvent += Server_ClientConnectedEvent;
-                        tcpServer.RecieveClientMessageEvent += Server_RecieveClientMessageEvent;
-                        tcpServer.ClientDisconnectedEvent += Server_ClientDisconnectedEvent;
-                        SocketManager.ddkTcpServers.Add(tcpServer);
-                    }
-                    else
-                    {
-                        tcpServer = _server;
-                        IsServerOpened = tcpServer.IsOpen;
-                    }
-                }
-                if (_type == "TcpServerClient")
-                {
-                    if (navigationContext.Parameters["Parent"] == null)
-                        return;
-                    string _parent = (string)navigationContext.Parameters["Parent"];
-                    CurrentViewType = SocketManager.ViewType.TcpServerClient;
-                    ClientIp = _ip;
-                    ClientPort = _port;
-                    tcpServer = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals(_parent));
-                    tcpClient = tcpServer.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals($"{clientIp}:{clientPort}"));
-                    DataRecieveStr = string.Empty;
-                    foreach (var str in tcpClient.RecieveStrs.ToArray())
-                    {
-                        DataRecieveStr += str;
-                    }
-                }
+                    case "TcpServer":
+                        Ip = _ip;
+                        Port = int.Parse(_port);
+                        CurrentViewType = SocketManager.ViewType.TcpServer;
+                        var _server = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals($"{Ip}:{Port}"));
+                        if (_server == null)
+                        {
+                            IsServerOpened = false;
+                            tcpServer = new DdkTcpServer(Ip, Port);
+                            tcpServer.ClientConnectedEvent += Server_ClientConnectedEvent;
+                            tcpServer.RecieveClientMessageEvent += Server_RecieveClientMessageEvent;
+                            tcpServer.ClientDisconnectedEvent += Server_ClientDisconnectedEvent;
+                            SocketManager.ddkTcpServers.Add(tcpServer);
+                        }
+                        else
+                        {
+                            tcpServer = _server;
+                            IsServerOpened = tcpServer.IsOpen;
+                        }
+                        break;
+                    case "TcpServerClient":
+                        if (navigationContext.Parameters["Parent"] == null)
+                            return;
+                        string _parent = (string)navigationContext.Parameters["Parent"];
+                        CurrentViewType = SocketManager.ViewType.TcpServerClient;
+                        ClientIp = _ip;
+                        ClientPort = _port;
+                        tcpServer = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals(_parent));
+                        tcpServerClient = tcpServer.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals($"{clientIp}:{clientPort}"));
+                        DataRecieveStr = string.Empty;
+                        foreach (var str in tcpServerClient.RecieveStrs.ToArray())
+                        {
+                            DataRecieveStr += str;
+                        }
+                        break;
+                    case "TcpClient":
+                        if (navigationContext.Parameters["LocalPort"] == null)
+                            return;
+                        string _localPort = (string)navigationContext.Parameters["LocalPort"]; 
+                        CurrentViewType = SocketManager.ViewType.TcpClient;
+                        Ip = NetworkTools.GetLocalIp(); 
+                        ClientIp = _ip;
+                        ClientPort = _port;
 
+                        var _tcpClient = SocketManager.ddkTcpClients.FirstOrDefault(c => c.Client.Client.RemoteEndPoint.ToString().Equals($"{Ip}:{Port}"));
+                        if (_tcpClient == null)
+                        {
+                            IsServerOpened = false;
+                            tcpClient = new DdkTcpClient(Ip, Port);
+                        }
+                        else
+                        {
+                            tcpClient = _tcpClient;
+                            IsServerOpened = tcpClient.IsOpen;
+                        }
+                        break; 
+                }   
             }
-            catch
+            catch(Exception ex)
             {
-
+                throw ex;
             }
         }
 
@@ -227,8 +258,8 @@ namespace DdkTestTool.ViewModels.SocketModels
             }
             else if (currentViewType == SocketManager.ViewType.TcpServerClient)
             {
-                if (tcpClient != null)
-                    tcpServer.OnClientDisconnected(tcpClient);
+                if (tcpServerClient != null)
+                    tcpServer.OnClientDisconnected(tcpServerClient);
             }
         }
 
@@ -250,17 +281,11 @@ namespace DdkTestTool.ViewModels.SocketModels
         }
         private void Server_ClientDisconnectedEvent(DdkTcpServer.Client client)
         {
-            switch (currentViewType)
-            {
-                case SocketManager.ViewType.TcpServer:
-                    DataRecieveStr += $"客户端:{client.TcpClient.Client.RemoteEndPoint} 已断开连接\r\n";
-                    break;
-            }
-
-            if(tcpServer.IsOpen)
+            var tcpServer = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals(client.TcpClient.Client.LocalEndPoint.ToString()));
+            if (tcpServer != null && tcpServer.IsOpen)
             { 
                 aggregator.GetEvent<UpdateTreeViewEvent>().Publish(new UpdateTreeViewModel(
-                    new TreeItem(NetworkTools.EndPointToUIString(client.TcpClient.Client.RemoteEndPoint), client.TcpClient.Client.RemoteEndPoint.ToString(), 2) { ImageSource = "/Images/circle-Red.png", ParentTag = tcpServer.server.LocalEndpoint.ToString() },
+                    new TreeItem(NetworkTools.EndPointToUIString(client.TcpClient.Client.RemoteEndPoint), client.TcpClient.Client.RemoteEndPoint.ToString(), 2) { ImageSource = "/Images/circle-Red.png", ParentTag = client.TcpClient.Client.LocalEndPoint.ToString() },
                     UpdateTreeViewModel.UpdateType.Remove));
             }
         }
@@ -268,40 +293,43 @@ namespace DdkTestTool.ViewModels.SocketModels
 
         private void Server_RecieveClientMessageEvent(DdkTcpServer.Client _client, byte[] data)
         {
-            var endPoint = _client.TcpClient.Client.RemoteEndPoint;
-            if (endPoint == null)
-                return;
-            string msg = $"收到客户端[{endPoint}]信息:{Encoding.UTF8.GetString(data)}\r\n";
-
-            var client = tcpServer.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals(endPoint.ToString()));
-            if (client == null)
-                return;
-            client.RecieveStrs.Add(msg);
-
-            if (currentViewType == SocketManager.ViewType.TcpServer)
-                DataRecieveStr += msg;
-            else if (currentViewType == SocketManager.ViewType.TcpServerClient)
+            try
             {
-                if (endPoint.ToString().Equals($"{clientIp}:{clientPort}"))
-                {
-                    DataRecieveStr += msg;
-                }
+                var endPoint = _client.TcpClient.Client.RemoteEndPoint;
+                if (endPoint == null)
+                    return;
+                string msg = $"收到客户端[{endPoint}]信息:{Encoding.UTF8.GetString(data)}\r\n";
+
+                var tcpServer = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals(_client.TcpClient.Client.LocalEndPoint.ToString()));
+                if (tcpServer == null || !tcpServer.IsOpen)
+                    return;
+
+                var client = tcpServer.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals(endPoint.ToString()));
+                if (client == null)
+                    return;
+                client.RecieveStrs.Add(msg);
+                 
+                if (currentViewType == SocketManager.ViewType.TcpServerClient && (endPoint.ToString().Equals($"{clientIp}:{clientPort}"))) 
+                    DataRecieveStr += msg;  
             }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+
         }
 
         private void Server_ClientConnectedEvent(DdkTcpServer.Client client)
         {
-            if (currentViewType != SocketManager.ViewType.TcpServer
-                || client.TcpClient.Client.RemoteEndPoint == null)
+            if (client.TcpClient.Client.RemoteEndPoint == null)
                 return;
             string? endPoint = client.TcpClient.Client.RemoteEndPoint.ToString();
 
             if (endPoint == null)
                 return;
-
-            DataRecieveStr += $"客户端:{endPoint} 已连接\r\n";
+             
             aggregator.GetEvent<UpdateTreeViewEvent>().Publish(new UpdateTreeViewModel(
-                        new TreeItem(NetworkTools.EndPointToUIString(client.TcpClient.Client.RemoteEndPoint), endPoint, 2) { ImageSource = "/Images/circle-Green.png", ParentTag = tcpServer.server.LocalEndpoint.ToString() }));
+                        new TreeItem(NetworkTools.EndPointToUIString(client.TcpClient.Client.RemoteEndPoint), endPoint, 2) { ImageSource = "/Images/circle-Green.png", ParentTag = client.TcpClient.Client.LocalEndPoint.ToString() }));
         }
 
         private async void SendMsg()
@@ -318,7 +346,7 @@ namespace DdkTestTool.ViewModels.SocketModels
                     break;
                 case SocketManager.ViewType.TcpServerClient:
                     for (int i = 0; i < sendTimes; i++)
-                        await tcpServer.SendAsync(tcpClient, DataSendStr);
+                        await tcpServer.SendAsync(tcpServerClient, DataSendStr);
                     break;
             }
             DataSendStr = string.Empty;

@@ -219,17 +219,29 @@ namespace CommunicationLib.Core.Network
 
 
         public void Disconnect()
-        {
-            //try
-            //{
-            //    foreach (Client clientLoop in tcpClientList)
-            //    {
-            //        clientLoop.NetworkStream.Close(00);
-            //    }
-            //}
-            //catch (Exception) { }
-            server.Stop();
-            IsOpen = false;
+        {  
+            try
+            {
+                foreach (Client clientLoop in tcpClientList)
+                {
+                    if (clientLoop.TcpClient.Client.Connected)
+                    {
+                        ClientDisconnectedEvent?.Invoke(clientLoop);
+                        clientLoop.TcpClient.Client.Disconnect(false);
+                    }
+                }
+                tcpClientList.Clear();
+            }
+            catch (Exception ex)
+            {
+                PushExceptionMessageEvent?.Invoke(ex.Message);
+            }
+            finally
+            { 
+                server.Stop();
+                IsOpen = false;
+            }
+
         }
 
         public void OnClientDisconnected(Client client)

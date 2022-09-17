@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 
 namespace DdkTestTool.ViewModels.SocketModels
 {
-    public class SocketIndexViewModel:BindableBase
+    public class SocketIndexViewModel:BindableBase, INavigationAware
     {
         #region Property
         private readonly IRegionManager regionManager;
@@ -41,6 +41,8 @@ namespace DdkTestTool.ViewModels.SocketModels
         }
 
         #endregion
+
+        #region Construction
         public SocketIndexViewModel(IRegionManager regionManager, IDialogService dialogService, IEventAggregator aggregator)
         {
             this.regionManager = regionManager;
@@ -124,6 +126,7 @@ namespace DdkTestTool.ViewModels.SocketModels
                 }
             });
         }
+        #endregion
 
         #region Command
         public DelegateCommand<string> ExecuteTreeViewCommand{get;private  set;}
@@ -151,7 +154,7 @@ namespace DdkTestTool.ViewModels.SocketModels
         /// <param name="obj">节点操作类型</param>
         private void ExecuteTreeView(string obj)
         {
-            if (string.IsNullOrEmpty(obj) || TreeViewSelectedRootNode == null)
+            if (string.IsNullOrEmpty(obj) || TreeViewSelectedRootNode == null || TreeViewSelectedNode == null)
                 return;
             switch(obj)
             {
@@ -169,31 +172,67 @@ namespace DdkTestTool.ViewModels.SocketModels
                                 TreeViewSelectedRootNode.Children.Add(child);
                             }
                         });
-                    } 
+                    }
+                    else if(TreeViewSelectedRootNode.Tag == "TcpClient")
+                    {
+                        dialogService.ShowDialog("AddClientDialog", null, dialogResult =>
+                        {
+                            if (dialogResult.Result != ButtonResult.OK && !dialogResult.Parameters.ContainsKey("Port") && !dialogResult.Parameters.ContainsKey("Ip"))
+                                return;
+                            var port = dialogResult.Parameters.GetValue<int>("Port");
+                            var ip = dialogResult.Parameters.GetValue<string>("Ip"); 
+
+                            if (!(port == null)&&!string.IsNullOrEmpty(ip))
+                            {
+                                DdkTcpClient tcpClient = new DdkTcpClient(ip, port);
+                                TreeItem child = new TreeItem($"{ip} [{port}]", $"{ip}:{port}", 1) { ImageSource = "/Images/circle-Red.png", Parent = TreeViewSelectedRootNode }; 
+                                SocketManager.ddkTcpClients.Add(tcpClient);
+                                TreeViewSelectedRootNode.Children.Add(child);
+                            }
+                        });
+                    }
                     break;
-                case "Delete":
-                    //TreeItems[0].ImageSource = "/Images/circle-Red.png"; 
-                    A = "/Images/circle-Green.png";
-                    TreeItems[0].Name = "fffzzz"; 
+                case "Delete": 
+                    if (TreeViewSelectedNode.Layer == 1 && TreeViewSelectedNode.Parent != null)
+                    {
+                        switch (TreeViewSelectedNode.Parent.Tag)
+                        {
+                            case "TcpServer":
+                                var _server = SocketManager.ddkTcpServers.First(s => s.server.LocalEndpoint.ToString().Equals(TreeViewSelectedNode.Tag));
+                                if (_server != null)
+                                {
+                                    _server.Disconnect();
+                                    SocketManager.ddkTcpServers.Remove(_server);
+                                }
+                                TreeViewSelectedNode.Parent.Children.Remove(TreeViewSelectedNode);
+                                regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("WelcomeView");
+                                break;
+                            case "TcpClient":
+                                break;
+                            case "UdpClient":
+                                break;
+                        }
+                    }
+                    else if (TreeViewSelectedNode.Layer == 2 && TreeViewSelectedNode.Parent != null && TreeViewSelectedNode.Parent.Parent != null)
+                    {
+                        switch (TreeViewSelectedNode.Parent.Parent.Tag)
+                        {
+                            case "TcpServer":
+                                var _server = SocketManager.ddkTcpServers.First(s => s.server.LocalEndpoint.ToString().Equals(TreeViewSelectedNode.Parent.Tag));
+                                if (_server != null)
+                                {
+                                    var _client = _server.tcpClientList.First(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals(TreeViewSelectedNode.Tag));
+                                    if (_client != null)
+                                    {
+                                        _server.OnClientDisconnected(_client);
+                                    }
+                                } 
+                                break;
+                        }
+                    }
                     break;
             }
-        }
-
-        //private BitmapImage a = new BitmapImage(new Uri("pack://application:,,,/Images/circle-Red.png"));
-
-        //public BitmapImage A
-        //{
-        //    get { return a; }
-        //    set { a = value; RaisePropertyChanged(); }
-        //}
-        private string a = "/Images/circle-Red.png";
-
-        public string A
-        {
-            get { return a; }
-            set { a = value; RaisePropertyChanged(); }
-        }
-
+        } 
 
         private void NavigateTo(TreeItem treeItem)
         {
@@ -216,10 +255,14 @@ namespace DdkTestTool.ViewModels.SocketModels
                     NavigationParameters param = new NavigationParameters();
                     param.Add("Port", port);
                     param.Add("Ip", ip);
-                    if(treeItem.Parent.Tag == "TcpServer")
+                    if (treeItem.Parent.Tag == "TcpServer")
                         param.Add("Type", "TcpServer");
-                    else if(treeItem.Parent.Tag == "TcpClient")
+                    else if (treeItem.Parent.Tag == "TcpClient")
+                    {
+                        string localPort = treeItem.Tag.Split(':')[2];
+                        param.Add("LocalPort", localPort);
                         param.Add("Type", "TcpClient");
+                    }
                     regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("SocketView", param);
                 }
             }
@@ -240,7 +283,21 @@ namespace DdkTestTool.ViewModels.SocketModels
                 }
             }
 
-        } 
+        }
+
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        { 
+            regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("WelcomeView");
+        }
+
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true;
+        }
+
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        { 
+        }
 
 
         #endregion
