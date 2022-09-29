@@ -24,7 +24,7 @@ namespace DdkTestTool.Models
         /// <summary>
         /// 内容标签
         /// </summary> 
-        public string Tag { get; set; }
+        public object Tag { get; set; }
 
         /// <summary>
         /// 层级
@@ -34,7 +34,7 @@ namespace DdkTestTool.Models
         /// 父级元素
         /// </summary>
         public TreeItem? Parent { get; set; }
-        public string? ParentTag { get; set; }
+        public object? ParentTag { get; set; }
         /// <summary>
         /// 子集集合
         /// </summary>
@@ -48,7 +48,7 @@ namespace DdkTestTool.Models
             get { return imageSource; }
             set { imageSource = value; RaisePropertyChanged(); }
         }
-        public TreeItem(string name, string tag, int layer)
+        public TreeItem(string name, object tag, int layer)
         {
             this.Name = name;
             this.Tag = tag;

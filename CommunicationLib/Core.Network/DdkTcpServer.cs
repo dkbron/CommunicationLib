@@ -28,10 +28,10 @@ namespace CommunicationLib.Core.Network
         public List<Client> tcpClientList = new List<Client>();
 
         public delegate void ClientConnectedDelegate(Client client);
-        public event ClientConnectedDelegate ClientConnectedEvent; 
+        public ClientConnectedDelegate ClientConnectedEvent; 
 
         public delegate void ClientDisConnectedDelegate(Client client);
-        public event ClientDisConnectedDelegate ClientDisconnectedEvent;
+        public ClientDisConnectedDelegate ClientDisconnectedEvent;
 
         /// <summary>
         /// 处理客户端信息事件
@@ -39,7 +39,7 @@ namespace CommunicationLib.Core.Network
         /// <param name="client">客户端</param>
         /// <param name="data">收到的信息</param>
         public delegate void RecieveClientMessageDelegate(Client client, byte[] data);
-        public event RecieveClientMessageDelegate RecieveClientMessageEvent;
+        public RecieveClientMessageDelegate RecieveClientMessageEvent;
 
         /// <summary>
         /// 推送错误信息事件
@@ -162,7 +162,8 @@ namespace CommunicationLib.Core.Network
                         return;
                     }
                     byte[] data = new byte[read];
-                    Buffer.BlockCopy(client.Buffer, 0, data, 0, read); 
+                    Buffer.BlockCopy(client.Buffer, 0, data, 0, read);
+                    client.Log.Add($"[{DateTime.Now.ToShortTimeString()}]收到: {Encoding.UTF8.GetString(data)}\r\n"); 
                     RecieveClientMessageEvent?.Invoke(client,data);
                     networkStream.BeginRead(client.Buffer, 0, client.Buffer.Length, ReadCallback, client);
 
@@ -273,7 +274,7 @@ namespace CommunicationLib.Core.Network
             private readonly TcpClient tcpClient;
             private readonly byte[] buffer;
 
-            public List<string> RecieveStrs = new List<string>();
+            public List<string> Log = new List<string>();
 
             public long Ticks { get; set; }
 

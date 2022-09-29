@@ -106,12 +106,14 @@ namespace DdkTestTool.ViewModels.SocketModels
                                         switch (model.Type)
                                         {
                                             case UpdateTreeViewModel.UpdateType.Add:
-                                                treeL2.Children.Add(model.TreeItem);
+                                                var treeItem = treeL2.Children.FirstOrDefault(t => t.Tag.Equals(model.TreeItem.Tag));
+                                                if(treeItem == null)
+                                                    treeL2.Children.Add(model.TreeItem);
                                                 break;
                                             case UpdateTreeViewModel.UpdateType.Remove:
-                                                var treeItem = treeL2.Children.First(t => t.Tag.Equals(model.TreeItem.Tag));
-                                                if (treeItem != null)
-                                                    treeL2.Children.Remove(treeItem);
+                                                var treeItem1 = treeL2.Children.FirstOrDefault(t => t.Tag.Equals(model.TreeItem.Tag));
+                                                if (treeItem1 != null)
+                                                    treeL2.Children.Remove(treeItem1);
                                                 break;
                                         }
                                     }, null);
@@ -159,35 +161,45 @@ namespace DdkTestTool.ViewModels.SocketModels
             switch(obj)
             {
                 case "Add":
-                    if(TreeViewSelectedRootNode.Tag == "TcpServer")
+                    if((string)TreeViewSelectedRootNode.Tag == "TcpServer")
                     {
                         dialogService.ShowDialog("AddServerDialog", null, dialogResult =>
                         {
                             if (dialogResult.Result != ButtonResult.OK && !dialogResult.Parameters.ContainsKey("Port"))
                                 return;
-                            var port = dialogResult.Parameters.GetValue<string>("Port");
-                            if (!string.IsNullOrEmpty(port))
-                            {
-                                TreeItem child = new TreeItem($"{NetworkTools.GetLocalIp()} [{port}]", $"{NetworkTools.GetLocalIp()}:{port}", 1) { ImageSource = "/Images/circle-Red.png", Parent = TreeViewSelectedRootNode };
+                            var port = dialogResult.Parameters.GetValue<int>("Port");
+                            if (NetworkTools.IsPort(port))
+                            { 
+                                DdkTcpServer tcpServer = new DdkTcpServer(NetworkTools.GetLocalIp(),port);
+                                TreeItem child = new TreeItem($"{NetworkTools.GetLocalIp()} [{port}]", tcpServer, 1) { ImageSource = "/Images/circle-Red.png", Parent = TreeViewSelectedRootNode };
                                 TreeViewSelectedRootNode.Children.Add(child);
                             }
                         });
                     }
-                    else if(TreeViewSelectedRootNode.Tag == "TcpClient")
+                    else if((string)TreeViewSelectedRootNode.Tag == "TcpClient")
                     {
                         dialogService.ShowDialog("AddClientDialog", null, dialogResult =>
                         {
                             if (dialogResult.Result != ButtonResult.OK && !dialogResult.Parameters.ContainsKey("Port") && !dialogResult.Parameters.ContainsKey("Ip"))
                                 return;
-                            var port = dialogResult.Parameters.GetValue<int>("Port");
+                            int port = dialogResult.Parameters.GetValue<int>("Port");
                             var ip = dialogResult.Parameters.GetValue<string>("Ip"); 
 
-                            if (!(port == null)&&!string.IsNullOrEmpty(ip))
+                            if (!string.IsNullOrEmpty(ip))
                             {
-                                DdkTcpClient tcpClient = new DdkTcpClient(ip, port);
-                                TreeItem child = new TreeItem($"{ip} [{port}]", $"{ip}:{port}", 1) { ImageSource = "/Images/circle-Red.png", Parent = TreeViewSelectedRootNode }; 
-                                SocketManager.ddkTcpClients.Add(tcpClient);
-                                TreeViewSelectedRootNode.Children.Add(child);
+                                try
+                                { 
+                                    DdkTcpClient tcpClient = new DdkTcpClient(ip, port);
+                                    tcpClient.DisConnectEvent += TcpClient_DisConnectEvent;
+                                    tcpClient.Connect();
+                                    TreeItem child = new TreeItem($"{ip} [{port}]", tcpClient, 1) { ImageSource = "/Images/circle-Green.png", Parent = TreeViewSelectedRootNode };
+                                    SocketManager.ddkTcpClients.Add(tcpClient);
+                                    TreeViewSelectedRootNode.Children.Add(child);
+                                }
+                                catch
+                                {
+
+                                }
                             }
                         });
                     }
@@ -208,6 +220,12 @@ namespace DdkTestTool.ViewModels.SocketModels
                                 regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("WelcomeView");
                                 break;
                             case "TcpClient":
+                                var _client = SocketManager.ddkTcpClients.First(c => c.Equals(TreeViewSelectedNode.Tag));
+                                if (_client != null)
+                                {
+                                    _client.DisConnect();
+                                    SocketManager.ddkTcpClients.Remove(_client);
+                                } 
                                 break;
                             case "UdpClient":
                                 break;
@@ -232,7 +250,21 @@ namespace DdkTestTool.ViewModels.SocketModels
                     }
                     break;
             }
-        } 
+        }
+
+        private void TcpClient_DisConnectEvent(DdkTcpClient obj)
+        {
+            var l1 = TreeItems.FirstOrDefault(l1 => (string)l1.Tag == "TcpClient");
+            if(l1 != null)
+            {
+                var l2 = l1.Children.FirstOrDefault(l2 => l2.Tag == obj);
+                if(l2 != null)
+                {
+                    l1.Children.Remove(l2);
+                    regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("WelcomeView");
+                }
+            }
+        }
 
         private void NavigateTo(TreeItem treeItem)
         {
@@ -249,20 +281,9 @@ namespace DdkTestTool.ViewModels.SocketModels
                 if (treeItem.Parent != null)
                 {
                     TreeViewSelectedRootNode = treeItem.Parent;
-
-                    string ip = treeItem.Tag.Split(':')[0];
-                    string port = treeItem.Tag.Split(':')[1];
+                     
                     NavigationParameters param = new NavigationParameters();
-                    param.Add("Port", port);
-                    param.Add("Ip", ip);
-                    if (treeItem.Parent.Tag == "TcpServer")
-                        param.Add("Type", "TcpServer");
-                    else if (treeItem.Parent.Tag == "TcpClient")
-                    {
-                        string localPort = treeItem.Tag.Split(':')[2];
-                        param.Add("LocalPort", localPort);
-                        param.Add("Type", "TcpClient");
-                    }
+                    param.Add("Tag", treeItem.Tag); 
                     regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("SocketView", param);
                 }
             }
@@ -271,14 +292,9 @@ namespace DdkTestTool.ViewModels.SocketModels
                 if (treeItem.Parent != null && treeItem.Parent.Parent != null)
                 {
                     TreeViewSelectedRootNode = treeItem.Parent.Parent; 
-
-                    string ip = treeItem.Tag.Split(':')[0];
-                    string port = treeItem.Tag.Split(':')[1];
+                     
                     NavigationParameters param = new NavigationParameters();
-                    param.Add("Parent", treeItem.Parent.Tag);
-                    param.Add("Port", port);
-                    param.Add("Ip", ip);
-                    param.Add("Type", "TcpServerClient");
+                    param.Add("Tag", treeItem.Tag); 
                     regionManager.Regions[PrismManager.SocketIndexViewRegionName].RequestNavigate("SocketView", param);
                 }
             }

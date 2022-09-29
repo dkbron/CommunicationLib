@@ -102,5 +102,11 @@ namespace CommunicationLib.Core.Network
             return $"{ip} [{port}]";
         }
 
+        public static IPEndPoint EndPointToIPEndPoint(EndPoint endPoint)
+        { 
+            IPEndPoint ipEndPoint = (IPEndPoint)endPoint;
+            return ipEndPoint;
+        }
+
     }
 }

@@ -11,17 +11,20 @@ namespace CommunicationLib.Core.Network
 { 
     public class DdkTcpClient : IDisposable
     {
-        public TcpClient Client { get; private set; }
-        public bool IsOpen { get; set; } 
+        public TcpClient Client { get; private set; } 
         private IPAddress LocalIPAddress = IPAddress.Any;
-
-
+        public List<string> Log = new List<string>();  
         public NetworkStream NetworkStream { get; private set; }
         private byte[] ReceiveBuffer;
+
+        public EndPoint LocalEndPoint { get; private set; }
+        public EndPoint RemoteEndPoint { get; private set; }
         /// <summary>
         /// 推送收到服务器信息事件
         /// </summary>
-        public Action<byte[]> RecieveServerMessageEvent;
+        public Action<DdkTcpClient, byte[]> RecieveServerMessageEvent;
+
+        public event Action<DdkTcpClient> DisConnectEvent;
 
         /// <summary>
         /// 推送异常信息事件
@@ -35,7 +38,7 @@ namespace CommunicationLib.Core.Network
         } 
         public DdkTcpClient(IPEndPoint localEP)
         {
-            Client = new TcpClient(localEP);
+            Client = new TcpClient(localEP); 
         }
         public DdkTcpClient(string hostname, int port)
         {
@@ -52,13 +55,36 @@ namespace CommunicationLib.Core.Network
         #endregion
         
         public void Connect()
-        {
-            //Client.Connect(remoteEP);
+        { 
             NetworkStream = Client.GetStream();
             NetworkStream.ReadTimeout = 4000;
             ReceiveBuffer = new byte[Client.ReceiveBufferSize];
-            NetworkStream.BeginRead(ReceiveBuffer, 0, Client.ReceiveBufferSize, ReadCallBack, null);
-        } 
+            NetworkStream.BeginRead(ReceiveBuffer, 0, Client.ReceiveBufferSize, ReadCallBack, null); 
+        }
+
+        public void DisConnect()
+        {
+            Client.Client.Disconnect(false);
+            DisConnectEvent?.Invoke(this);
+        }
+
+        public void Send(string msg)
+        { 
+            if (msg == null) throw new ArgumentNullException(nameof(msg));
+
+            byte[] sendMsg = Encoding.UTF8.GetBytes(msg);
+            if (Client.Connected)
+                NetworkStream.Write(sendMsg, 0, sendMsg.Length);
+        }
+
+        public async Task SendAsync(string msg)
+        {
+            if (msg == null) throw new ArgumentNullException(nameof(msg));
+
+            byte[] sendMsg = Encoding.UTF8.GetBytes(msg);
+            if (Client.Connected)
+                await NetworkStream.WriteAsync(sendMsg, 0, sendMsg.Length);
+        }
 
         private void ReadCallBack(IAsyncResult ir)
         {
@@ -72,8 +98,8 @@ namespace CommunicationLib.Core.Network
                 }
                 byte[] data = new byte[read];
                 Buffer.BlockCopy(ReceiveBuffer, 0, data, 0, read);
-                string a = Encoding.UTF8.GetString(data);
-                //RecieveClientMessageEvent?.Invoke(client, data);
+                Log.Add($"[{DateTime.Now.ToShortTimeString()}]收到: {Encoding.UTF8.GetString(data)}\r\n");
+                RecieveServerMessageEvent?.Invoke(this, data);
                 NetworkStream.BeginRead(ReceiveBuffer, 0, ReceiveBuffer.Length, ReadCallBack, null);
             }
             catch
@@ -82,10 +108,34 @@ namespace CommunicationLib.Core.Network
             }
         }
 
+        public void Close()
+        { 
+            ((IDisposable)this).Dispose(); 
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {   
+            if (disposing)
+            {
+                IDisposable dataStream = NetworkStream;
+                if (dataStream != null)
+                {
+                    dataStream.Dispose();
+                }
+                Log = null;
+                Client.Dispose();
+                GC.SuppressFinalize(this);
+            }
+        }
+
         public void Dispose()
-        {  
-            NetworkStream?.Dispose();
-            Client.Close();
+        {
+            Dispose(disposing: true);
+        }
+
+        ~DdkTcpClient()
+        {
+            Dispose(disposing: false);
         }
     }
 }

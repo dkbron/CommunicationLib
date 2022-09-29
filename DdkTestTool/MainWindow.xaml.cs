@@ -46,27 +46,7 @@ namespace DdkTestTool
                 //if (result.Result == Prism.Services.Dialogs.ButtonResult.No)
                 //    return;
                 this.Close();
-            };
- 
-            //colorZoneNavigate.MouseDown += (sender, e) =>
-            //{
-            //    if (e.ButtonState == MouseButtonState.Pressed)
-            //        this.DragMove();
-            //};
-
-            //colorZoneNavigate.MouseDoubleClick += (sender, e) =>
-            //{
-            //    if (this.WindowState == WindowState.Normal)
-            //    {
-            //        this.WindowState = WindowState.Maximized;
-            //        btnMax.Content = "❐";
-            //    }
-            //    else
-            //    {
-            //        this.WindowState = WindowState.Normal;
-            //        btnMax.Content = "☐";
-            //    }
-            //};
+            }; 
         } 
     }
 }

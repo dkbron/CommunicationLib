@@ -16,7 +16,7 @@ namespace DdkTestTool.Converter
         {
             if (value != null && value is SocketManager.ViewType result)
             {
-                if (result == SocketManager.ViewType.TcpServer || result == SocketManager.ViewType.TcpClient)
+                if (result == SocketManager.ViewType.TcpServer)
                     return Visibility.Visible;
             }
             

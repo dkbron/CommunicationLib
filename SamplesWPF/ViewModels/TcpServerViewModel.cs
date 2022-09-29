@@ -199,7 +199,7 @@ namespace SamplesWPF.ViewModels
                     server = SocketManager.ddkTcpServers.FirstOrDefault(s => s.server.LocalEndpoint.ToString().Equals(_parent));
                     tcpClient = server.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals($"{clientIp}:{clientPort}"));
                     DataRecieveStr = string.Empty;
-                    foreach (var str in tcpClient.RecieveStrs.ToArray())
+                    foreach (var str in tcpClient.Log.ToArray())
                     { 
                         DataRecieveStr += str;
                     }
@@ -261,7 +261,7 @@ namespace SamplesWPF.ViewModels
         { 
             string msg = $"收到客户端[{_client.TcpClient.Client.RemoteEndPoint}]信息:{Encoding.UTF8.GetString(data)}\r\n";
             var client = server.tcpClientList.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint.ToString().Equals(_client.TcpClient.Client.RemoteEndPoint.ToString()));
-            client.RecieveStrs.Add(msg);
+            client.Log.Add(msg);
 
             if(currentViewType == SocketManager.ViewType.TcpServer)
                 DataRecieveStr += msg;
